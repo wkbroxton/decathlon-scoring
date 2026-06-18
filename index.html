@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Church Decathlon — Scoreboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1A2B4A;
+    --gold: #D4A017;
+    --gold2: #F5C842;
+    --cream: #FDF8EE;
+    --red-bg: #FCEBEB; --red-border: #E24B4A; --red-text: #A32D2D;
+    --blue-bg: #E6F1FB; --blue-border: #378ADD; --blue-text: #185FA5;
+    --green-bg: #EAF3DE; --green-border: #639922; --green-text: #3B6D11;
+    --surface: #ffffff;
+    --surface2: #f7f7f5;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --text: #1a1a1a;
+    --text2: #555;
+    --text3: #888;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #1c1c1e;
+      --surface2: #2c2c2e;
+      --border: rgba(255,255,255,0.10);
+      --border2: rgba(255,255,255,0.20);
+      --text: #f2f2f7;
+      --text2: #aeaeb2;
+      --text3: #636366;
+      --cream: #22201a;
+      --red-bg: #2d1414; --red-text: #f09595;
+      --blue-bg: #0e1e2f; --blue-text: #85b7eb;
+      --green-bg: #131f0a; --green-text: #97c459;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--surface2);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 3rem;
+  }
+
+  /* ── Header ── */
+  .hero {
+    background: var(--navy);
+    text-align: center;
+    padding: 2rem 1.5rem 1.75rem;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold2);
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  .hero p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 680px; margin: 0 auto; padding: 0 1rem; }
+
+  /* ── Team totals ── */
+  .totals {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 1.25rem 0 1rem;
+  }
+  .team-card {
+    border-radius: var(--radius-lg);
+    padding: 1rem 0.75rem;
+    text-align: center;
+    border: 2px solid transparent;
+    background: var(--surface);
+    transition: transform 0.15s;
+  }
+  .team-card.red   { background: var(--red-bg);   border-color: var(--red-border); }
+  .team-card.blue  { background: var(--blue-bg);  border-color: var(--blue-border); }
+  .team-card.green { background: var(--green-bg); border-color: var(--green-border); }
+  .team-card.leader { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .team-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .red  .team-label { color: var(--red-text); }
+  .blue .team-label { color: var(--blue-text); }
+  .green .team-label { color: var(--green-text); }
+  .team-score { font-size: 40px; font-weight: 700; line-height: 1; }
+  .red  .team-score { color: var(--red-text); }
+  .blue .team-score { color: var(--blue-text); }
+  .green .team-score { color: var(--green-text); }
+  .team-pts { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .rank-badge { font-size: 20px; margin-top: 6px; display: block; }
+
+  /* ── Progress ── */
+  .progress-wrap { margin: 0.5rem 0 0.25rem; }
+  .progress-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #1D9E75; border-radius: 3px; transition: width 0.4s ease; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    font-size: 12px; color: var(--text2);
+    margin: 0.85rem 0 1rem;
+    justify-content: center;
+  }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .pip { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ── Events card ── */
+  .events-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border);
+    overflow: hidden;
+  }
+  .events-card-header {
+    padding: 0.85rem 1rem;
+    background: var(--navy);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .events-card-header h2 { font-size: 14px; font-weight: 600; color: var(--gold2); letter-spacing: 0.04em; text-transform: uppercase; }
+  .reset-btn {
+    font-size: 11px; color: rgba(255,255,255,0.5);
+    background: none; border: 0.5px solid rgba(255,255,255,0.2);
+    border-radius: 6px; padding: 4px 10px; cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .reset-btn:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+
+  /* ── Event rows ── */
+  .event-row {
+    display: grid;
+    grid-template-columns: 1fr repeat(3, 90px) 36px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 0.5px solid var(--border);
+    gap: 6px;
+    transition: opacity 0.2s;
+  }
+  .event-row:last-child { border-bottom: none; }
+  .event-row.completed { opacity: 0.5; }
+  .event-row-header {
+    display: grid;
+    grid-template-columns: 1fr repeat(3, 90px) 36px;
+    padding: 6px 12px;
+    gap: 6px;
+    background: var(--cream);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .col-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); text-align: center; }
+  .col-label.event-col { text-align: left; }
+  .event-name { font-size: 13px; color: var(--text); font-weight: 500; }
+  .event-num { font-size: 11px; color: var(--text3); }
+
+  /* ── Point buttons ── */
+  .btn-group { display: flex; gap: 3px; justify-content: center; }
+  .pt-btn {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    border: 0.5px solid var(--border2);
+    background: var(--surface2);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; color: var(--text2);
+    transition: transform 0.1s, background 0.1s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pt-btn:active { transform: scale(0.9); }
+  .pt-btn.gold   { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+  .pt-btn.silver { background: #B0B8C8; border-color: #B0B8C8; color: #fff; }
+  .pt-btn.bronze { background: #cd9b6a; border-color: #cd9b6a; color: #fff; }
+
+  /* ── Done button ── */
+  .done-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border2);
+    background: var(--surface2);
+    cursor: pointer; color: var(--text3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+  }
+  .done-btn:active { transform: scale(0.9); }
+  .done-btn.checked { background: #1D9E75; border-color: #1D9E75; color: #fff; }
+
+  /* ── Winner banner ── */
+  .winner-banner {
+    display: none;
+    margin-top: 1.25rem;
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+  }
+  .winner-banner.show { display: block; }
+  .winner-banner h2 { color: var(--gold2); font-size: 18px; margin-bottom: 4px; }
+  .winner-banner p { color: rgba(255,255,255,0.6); font-size: 13px; }
+
+  /* ── Final Challenge double points ── */
+  .final-row { background: linear-gradient(90deg, rgba(212,160,23,0.08) 0%, transparent 100%); }
+  .double-badge {
+    display: inline-block;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
+    background: var(--gold); color: var(--navy);
+    border-radius: 4px; padding: 1px 5px;
+    vertical-align: middle; margin-left: 4px;
+    text-transform: uppercase;
+  }
+  .final-pt { border-color: var(--gold) !important; }
+  .pt-btn.final-pt:not(.gold):not(.silver):not(.bronze) { color: var(--gold); }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .event-row, .event-row-header { grid-template-columns: 1fr repeat(3, 72px) 32px; gap: 4px; padding: 9px 8px; }
+    .pt-btn { width: 22px; height: 22px; font-size: 11px; }
+    .team-score { font-size: 32px; }
+    .hero h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">First Annual</div>
+  <h1>Church Decathlon</h1>
+  <p>Father's Day &nbsp;•&nbsp; June 21, 2026 &nbsp;•&nbsp; Fox Hill Park</p>
+</div>
+
+<div class="container">
+
+  <div class="totals" id="totals"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">0 of 10 events complete</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="legend">
+    <span><div class="pip" style="background:var(--gold)"></div>1st = 3 pts</span>
+    <span><div class="pip" style="background:#B0B8C8"></div>2nd = 2 pts</span>
+    <span><div class="pip" style="background:#cd9b6a"></div>3rd = 1 pt</span>
+    <span><div class="pip" style="background:var(--gold);border-radius:50%"></div>Final Challenge = 2× (6 / 4 / 2)</span>
+    <span><i class="ti ti-check" style="color:#1D9E75;font-size:14px"></i> = event done</span>
+  </div>
+
+  <div class="events-card">
+    <div class="events-card-header">
+      <h2>Live Scores</h2>
+      <button class="reset-btn" onclick="resetAll()">Reset all</button>
+    </div>
+    <div class="event-row-header">
+      <div class="col-label event-col">Event</div>
+      <div class="col-label" style="color:var(--red-border)">Red</div>
+      <div class="col-label" style="color:var(--blue-border)">Blue</div>
+      <div class="col-label" style="color:var(--green-border)">Green</div>
+      <div class="col-label"></div>
+    </div>
+    <div id="event-rows"></div>
+  </div>
+
+  <div class="winner-banner" id="winner-banner">
+    <div style="font-size:36px" id="winner-emoji">🏆</div>
+    <h2 id="winner-name">Team Name</h2>
+    <p id="winner-sub">Wins the Church Decathlon!</p>
+  </div>
+
+</div>
+
+<script>
+const EVENTS = [
+  "Potato Sack Race","Three-Legged Race","Egg & Spoon Race","Tug of War",
+  "Hula Hoop Contest","Wheelbarrow Race","Bean Bag Toss",
+  "Water Balloon Toss","Paper Airplane Contest","Final Challenge Relay"
+];
+const TEAMS = ["red","blue","green"];
+const LABELS = {red:"Red Team", blue:"Blue Team", green:"Green Team"};
+
+let scores;
+try {
+  scores = JSON.parse(localStorage.getItem('decathlon_scores_v2')) || null;
+} catch(e) { scores = null; }
+if (!scores) scores = EVENTS.map(() => ({red:0,blue:0,green:0,done:false}));
+
+function save() {
+  try { localStorage.setItem('decathlon_scores_v2', JSON.stringify(scores)); } catch(e){}
+}
+
+const FINAL_IDX = EVENTS.length - 1;
+
+function getTotals() {
+  const t = {red:0,blue:0,green:0};
+  scores.forEach((e, i) => {
+    const mult = i === FINAL_IDX ? 2 : 1;
+    TEAMS.forEach(tm => t[tm] += e[tm] * mult);
+  });
+  return t;
+}
+
+function renderTotals() {
+  const t = getTotals();
+  const sorted = [...TEAMS].sort((a,b) => t[b]-t[a]);
+  const max = t[sorted[0]];
+  const leaders = TEAMS.filter(tm => t[tm]===max && max>0);
+  const medals = {[sorted[0]]:'🏆',[sorted[1]]:'🥈',[sorted[2]]:'🥉'};
+  if (leaders.length > 1) leaders.forEach(tm => medals[tm] = '🤝');
+
+  document.getElementById('totals').innerHTML = TEAMS.map(tm => {
+    const isLeader = t[tm]===max && max>0 && leaders.length===1;
+    return `<div class="team-card ${tm}${isLeader?' leader':''}">
+      <div class="team-label">${LABELS[tm]}</div>
+      <div class="team-score">${t[tm]}</div>
+      <div class="team-pts">points</div>
+      <span class="rank-badge">${max>0?medals[tm]:''}</span>
+    </div>`;
+  }).join('');
+
+  const done = scores.filter(e=>e.done).length;
+  const allDone = done === EVENTS.length;
+  document.getElementById('winner-banner').className = 'winner-banner' + (allDone?' show':'');
+  if (allDone) {
+    const winner = sorted[0];
+    const isTie = leaders.length > 1;
+    document.getElementById('winner-emoji').textContent = isTie ? '🤝' : '🏆';
+    document.getElementById('winner-name').textContent = isTie
+      ? leaders.map(tm=>LABELS[tm]).join(' & ')
+      : LABELS[winner];
+    document.getElementById('winner-sub').textContent = isTie
+      ? `It's a tie! Final score: ${t[leaders[0]]} points each`
+      : `Wins the Church Decathlon! Final score: ${t[winner]} pts`;
+  }
+}
+
+function renderProgress() {
+  const done = scores.filter(e=>e.done).length;
+  const pct = Math.round(done/EVENTS.length*100);
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('progress-text').textContent = `${done} of ${EVENTS.length} events complete`;
+  document.getElementById('progress-pct').textContent = pct+'%';
+}
+
+function renderRows() {
+  document.getElementById('event-rows').innerHTML = EVENTS.map((name,i) => {
+    const e = scores[i];
+    const isFinal = i === FINAL_IDX;
+    const pts = isFinal ? [6,4,2] : [3,2,1];
+    const raw = [3,2,1];
+    const btnGroup = (tm) => raw.map((v, vi) => {
+      const cls = e[tm]===v ? (v===3?'gold':v===2?'silver':'bronze') : '';
+      const label = v===3?'1st':v===2?'2nd':'3rd';
+      const displayPts = pts[vi];
+      return `<button class="pt-btn ${cls}${isFinal?' final-pt':''}" onclick="setScore(${i},'${tm}',${v})" title="${label} place (${displayPts} pts)">${displayPts}</button>`;
+    }).join('');
+    const finalBadge = isFinal ? `<span class="double-badge">2× POINTS</span>` : '';
+    return `<div class="event-row${e.done?' completed':''}${isFinal?' final-row':''}" id="row-${i}">
+      <div>
+        <div class="event-num">${String(i+1).padStart(2,'0')} ${finalBadge}</div>
+        <div class="event-name">${name}</div>
+      </div>
+      ${TEAMS.map(tm=>`<div><div class="btn-group">${btnGroup(tm)}</div></div>`).join('')}
+      <button class="done-btn${e.done?' checked':''}" onclick="toggleDone(${i})" title="Mark complete" aria-label="Mark event ${i+1} complete">
+        <i class="ti ti-check" aria-hidden="true"></i>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function setScore(evIdx, team, val) {
+  scores[evIdx][team] = scores[evIdx][team]===val ? 0 : val;
+  save(); renderTotals(); renderRows();
+}
+
+function toggleDone(evIdx) {
+  scores[evIdx].done = !scores[evIdx].done;
+  save(); renderProgress(); renderTotals(); renderRows();
+}
+
+function resetAll() {
+  if(!confirm('Reset all scores? This cannot be undone.')) return;
+  scores = EVENTS.map(()=>({red:0,blue:0,green:0,done:false}));
+  save(); renderTotals(); renderProgress(); renderRows();
+}
+
+renderTotals(); renderProgress(); renderRows();
+</script>
+</body>
+</html>
